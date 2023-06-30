@@ -1,0 +1,51 @@
+const [isPlaying, setPlaying] = useState(false)
+
+  const [selectedFile, setSelectedFile] = useState("")
+
+  useEffect(() => {
+    console.log(selectedFile)
+  }, [selectedFile])
+
+  const [play, { duration, pause, sound, stop }] = useSound(selectedFile)
+
+  const [sec, setSec] = useState(0)
+  const [currTime, setCurrTime] = useState({
+    min: 0,
+    sec: 0
+  })
+  const [totalTime, setTotalTime] = useState({
+    min: 0,
+    sec: 0
+  })
+
+  useEffect(() => {
+    const time = setInterval(() => {
+      if (sound) {
+        setSec((_) => Math.floor(sound.seek([])))
+        const seconds = duration / 1000
+        const mins = Math.floor(seconds / 60)
+        setCurrTime(() => {
+          const currM = Math.floor(sound.seek([]) / 60)
+          const currS = Math.floor(sound.seek([]) % 60)
+          return {
+            min: currM,
+            sec: currS
+          }
+        })
+        setTotalTime({
+          min: mins,
+          sec: Math.floor(seconds % 60)
+        })
+        sound.on("end", () => {
+          sound.seek([0])
+          setPlaying((_) => false)
+        })
+      }
+    }, 10)
+
+    return () => clearInterval(time)
+  }, [sound])
+  useEffect(() => {
+    if (isPlaying) play()
+    else pause()
+  }, [isPlaying])
